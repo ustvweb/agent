@@ -4,9 +4,9 @@ namespace Jenssegers\Agent;
 
 use BadMethodCallException;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
-use Mobile_Detect;
+use Detection\MobileDetect;
 
-class Agent extends Mobile_Detect
+class Agent extends MobileDetect
 {
     /**
      * List of desktop devices.
@@ -106,13 +106,20 @@ class Agent extends Mobile_Detect
         return $rules;
     }
 
-    public function getRules()
+    public function getRules(): array
     {
-        if ($this->detectionType === static::DETECTION_TYPE_EXTENDED) {
-            return static::getDetectionRulesExtended();
+        static $rules;
+
+        if (!$rules) {
+            $rules = array_merge(
+                static::$browsers,
+                static::$operatingSystems,
+                static::$phoneDevices,
+                static::$tabletDevices
+            );
         }
 
-        return static::getMobileDetectionRules();
+        return $rules;
     }
 
     /**
@@ -127,7 +134,7 @@ class Agent extends Mobile_Detect
         return static::$crawlerDetect;
     }
 
-    public static function getBrowsers()
+    public static function getBrowsers(): array
     {
         return static::mergeRules(
             static::$additionalBrowsers,
@@ -135,7 +142,7 @@ class Agent extends Mobile_Detect
         );
     }
 
-    public static function getOperatingSystems()
+    public static function getOperatingSystems(): array
     {
         return static::mergeRules(
             static::$operatingSystems,
@@ -156,7 +163,7 @@ class Agent extends Mobile_Detect
         return static::$desktopDevices;
     }
 
-    public static function getProperties()
+    public static function getProperties(): array
     {
         return static::mergeRules(
             static::$additionalProperties,
@@ -331,9 +338,9 @@ class Agent extends Mobile_Detect
         return "other";
     }
 
-    public function version($propertyName, $type = self::VERSION_TYPE_STRING)
+    public function version(string $propertyName, string $type = self::VERSION_TYPE_STRING): float|bool|string
     {
-        if (empty($propertyName)) {
+        if (empty($propertyName) || !$this->hasUserAgent()) {
             return false;
         }
 
@@ -346,25 +353,18 @@ class Agent extends Mobile_Detect
 
         // Check if the property exists in the properties array.
         if (true === isset($properties[$propertyName])) {
-
             // Prepare the pattern to be matched.
             // Make sure we always deal with an array (string is converted).
             $properties[$propertyName] = (array) $properties[$propertyName];
 
             foreach ($properties[$propertyName] as $propertyMatchString) {
-                if (is_array($propertyMatchString)) {
-                    $propertyMatchString = implode("|", $propertyMatchString);
-                }
-
-                $propertyPattern = str_replace('[VER]', self::VER, $propertyMatchString);
+                $propertyPattern = str_replace('[VER]', self::VERSION_REGEX, $propertyMatchString);
 
                 // Identify and extract the version.
                 preg_match(sprintf('#%s#is', $propertyPattern), $this->userAgent, $match);
 
                 if (false === empty($match[1])) {
-                    $version = ($type === self::VERSION_TYPE_FLOAT ? $this->prepareVersionNo($match[1]) : $match[1]);
-
-                    return $version;
+                    return ($type == self::VERSION_TYPE_FLOAT ? $this->prepareVersionNo($match[1]) : $match[1]);
                 }
             }
         }
