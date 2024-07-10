@@ -10,6 +10,12 @@
             "homepage": "https://jenssegers.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ustvweb/Mobile-Detect.git"
+        }
+    ],
     "require": {
         "php": ">=5.6",
         "mobiledetect/mobiledetectlib": "^4.8.6",
