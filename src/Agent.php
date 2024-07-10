@@ -209,8 +209,11 @@ class Agent extends MobileDetect
      * @param  string|null $userAgent
      * @return string|bool
      */
-    protected function findDetectionRulesAgainstUA(array $rules, $userAgent = null)
+    protected function findDetectionRulesAgainstUA(array $rules, $userAgent = '')
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         // Loop given rules
         foreach ($rules as $key => $regex) {
             if (empty($regex)) {
@@ -231,8 +234,11 @@ class Agent extends MobileDetect
      * @param  string|null $userAgent
      * @return string|bool
      */
-    public function browser($userAgent = null)
+    public function browser($userAgent = '')
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         return $this->findDetectionRulesAgainstUA(static::getBrowsers(), $userAgent);
     }
 
@@ -241,8 +247,11 @@ class Agent extends MobileDetect
      * @param  string|null $userAgent
      * @return string|bool
      */
-    public function platform($userAgent = null)
+    public function platform($userAgent = '')
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         return $this->findDetectionRulesAgainstUA(static::getPlatforms(), $userAgent);
     }
 
@@ -251,8 +260,11 @@ class Agent extends MobileDetect
      * @param  string|null $userAgent
      * @return string|bool
      */
-    public function device($userAgent = null)
-    {
+    public function device($userAgent = '')
+    {   
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         $rules = static::mergeRules(
             static::getDesktopDevices(),
             static::getPhoneDevices(),
@@ -269,8 +281,11 @@ class Agent extends MobileDetect
      * @param  array $httpHeaders deprecated
      * @return bool
      */
-    public function isDesktop($userAgent = null, $httpHeaders = null)
+    public function isDesktop($userAgent = '', $httpHeaders = null)
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         // Check specifically for cloudfront headers if the useragent === 'Amazon CloudFront'
         if ($this->getUserAgent() === 'Amazon CloudFront') {
             $cfHeaders = $this->getCfHeaders();
@@ -288,8 +303,11 @@ class Agent extends MobileDetect
      * @param  array $httpHeaders deprecated
      * @return bool
      */
-    public function isPhone($userAgent = null, $httpHeaders = null)
+    public function isPhone($userAgent = '', $httpHeaders = null)
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         return $this->isMobile($userAgent, $httpHeaders) && !$this->isTablet($userAgent, $httpHeaders);
     }
 
@@ -298,8 +316,11 @@ class Agent extends MobileDetect
      * @param  string|null $userAgent
      * @return string|bool
      */
-    public function robot($userAgent = null)
+    public function robot($userAgent = '')
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         if ($this->getCrawlerDetect()->isCrawler($userAgent ?: $this->userAgent)) {
             return ucfirst($this->getCrawlerDetect()->getMatches());
         }
@@ -312,8 +333,11 @@ class Agent extends MobileDetect
      * @param  string|null $userAgent
      * @return bool
      */
-    public function isRobot($userAgent = null)
+    public function isRobot($userAgent = '')
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         return $this->getCrawlerDetect()->isCrawler($userAgent ?: $this->userAgent);
     }
 
@@ -323,8 +347,11 @@ class Agent extends MobileDetect
      * @param null $httpHeaders
      * @return string
      */
-    public function deviceType($userAgent = null, $httpHeaders = null)
+    public function deviceType($userAgent = '', $httpHeaders = null)
     {
+        if($this->hasUserAgent()){
+            $userAgent = $this->userAgent;
+        }
         if ($this->isDesktop($userAgent, $httpHeaders)) {
             return "desktop";
         } elseif ($this->isPhone($userAgent, $httpHeaders)) {
